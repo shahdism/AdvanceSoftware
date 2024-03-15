@@ -6,7 +6,9 @@ const bcrypt = require('bcrypt');
 
 // Define the port number
 const port = 6001;
-
+const app = express();
+app.use(express.json());
+app.use(router);
 // Middleware function for logging incoming requests
 router.use((req, res, next) => {
   console.log(`Incoming ${req.method} request to ${req.originalUrl}`);
@@ -60,7 +62,8 @@ function verifyToken(req, res, next) {
   });
 }
 
-module.exports = {
-  router,
-  port
-};
+
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
