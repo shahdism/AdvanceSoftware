@@ -1,60 +1,75 @@
 create database craft;
 use craft;
-create table users( userID char(10),
-                     username char (10),
-                     password char(10),
-                     email char (50),
-                     craftskills char (20),
-                     intrests char (20) );
-select * from users;
-create table skill( skillID char(10),
-                     skillname char (20));
-select * from skill;
-create table intrest( intrestID char(10),
-                     intrestname char (10));
-select * from intrest;
+CREATE TABLE users (
+    userID INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL
+);
 
-create table project( projectID char(10),
-                     title char (20),
-                     description char(150),
-                     difflevel char (10),
-                     groupsize char (20),
-                     userID char (10) );
-select * from project;
-create table material( ID char(10),
-                     name char (20),
-                     userID char (10),
-                     amount double
-                    );
-select * from material;
-create table tool( toolID char(10),
-                     toolname char (20),
-                     userID char(10),
-				
-                     amount double );
-select * from tool;
-create table collaboration( ID char(10),
-                     projectID char(10),
-                   userID char(10),
-                     statuss char (200) );
-select * from collaboration;
-create table communication( communicationID char(10),
-                   collaborationID char (10),
-                  message char(200),
-                    
-                     timestamp char (20) );
-select * from communication;
-create table resourceShare( resourceshareID char(10),
-                    userID char (10),
-                    materialID char(10),
-                     toolID char (50)
-                     );
-select * from resourceShare;
-create table showcase( caseID char(10),
-                  projectID char (10),
-                  
-                     imageurl char (200) );
-select * from showcase;
+CREATE TABLE skill (
+    skillID INT PRIMARY KEY AUTO_INCREMENT,
+    skillName VARCHAR(50) NOT NULL
+);
 
-ALTER TABLE collaboration CHANGE collalID collaborationID char(20);
-select * from material;
+CREATE TABLE interest (
+    interestID INT PRIMARY KEY AUTO_INCREMENT,
+    interestName VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE project (
+    projectID INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    diffLevel VARCHAR(20),
+    groupSize INT,
+    userID INT,
+    FOREIGN KEY (userID) REFERENCES users(userID)
+);
+
+CREATE TABLE material (
+    materialID INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    userID INT,
+    amount DOUBLE,
+    FOREIGN KEY (userID) REFERENCES users(userID)
+);
+
+CREATE TABLE tool (
+    toolID INT PRIMARY KEY AUTO_INCREMENT,
+    toolName VARCHAR(100) NOT NULL,
+    userID INT,
+    amount DOUBLE,
+    FOREIGN KEY (userID) REFERENCES users(userID)
+);
+
+CREATE TABLE collaboration (
+    collaborationID INT PRIMARY KEY AUTO_INCREMENT,
+    projectID INT,
+    userID INT,
+    status VARCHAR(200)
+);
+
+CREATE TABLE communication (
+    communicationID INT PRIMARY KEY AUTO_INCREMENT,
+    collaborationID INT,
+    senderID INT,
+    message VARCHAR(200),
+    timestamp TIMESTAMP
+);
+
+CREATE TABLE resourceShare (
+    resourceShareID INT PRIMARY KEY AUTO_INCREMENT,
+    userID INT,
+    materialID INT,
+    toolID INT
+);
+
+CREATE TABLE showcase (
+    caseID INT PRIMARY KEY AUTO_INCREMENT,
+    projectID INT,
+    imageurl VARCHAR(200),
+    description TEXT
+);
+
+

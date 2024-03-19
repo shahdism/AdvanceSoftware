@@ -3,7 +3,8 @@ const router = express.Router();
 const db = require('../models/connection');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-
+//require('dotenv').config();
+const JWT_SECRET='9+bLqkJoXxzSNN+q0Mm4vkk7ViLVEEcKH/K4TcOGOO8=';
 // Define the port number
 const port = 6001;
 const app = express();
@@ -15,32 +16,79 @@ router.use((req, res, next) => {
   next();
 });
 
-// Route to add a new user
+
 router.post('/users', (req, res, next) => {
   console.log('Received request to add a new user:', req.body);
-  const {userID, username, email, password, craftskills, interest } = req.body;
-  if (!userID,!username || !email || !password || !craftskills || !interest) {
-    return res.status(400).json({ error: 'Username, email, password, craftskills, and interest are required' });
+  const { username, email, password } = req.body;
+  if (!username || !email || !password) {
+    return res.status(400).json({ error: 'Username, email, and password are required' });
   }
 
   bcrypt.hash(password, 10, (err, hash) => {
     if (err) {
       console.error('Error hashing password: ', err);
-      return next(err); // Pass the error to the error handling middleware
+      return next(err);
     }
-    const newUser = { username, email, password: hash, craftskills, interest };
+    const newUser = { username, email, password: hash};
     db.query('INSERT INTO users SET ?', newUser, (err, result) => {
       if (err) {
         console.error('Error adding user: ', err);
-        return next(err); // Pass the error to the error handling middleware
+        return next(err);
       }
-      const token = jwt.sign({ username: newUser.username, email: newUser.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      console.log(process.env.JWT_SECRET);
+      const token = jwt.sign({ username: newUser.username, email: newUser.email }, JWT_SECRET, { expiresIn: '7d' }); // Expires in 7 days
       res.status(201).json({ message: 'User added successfully', userId: result.insertId, token });
     });
   });
 });
 
-// Error handling middleware
+
+router.get('/users/:userID', (req, res, next) => {
+  const userID = req.params.userID;
+
+
+  db.query('SELECT * FROM users WHERE userID = ?', userID, (err, result) => {
+    if (err) {
+      console.error('Error retrieving user: ', err);
+      return next(err); 
+    }
+    if (result.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const user = result[0];
+    res.status(200).json(user);
+  });
+});
+
+router.delete('/users/:userID', (req, res, next) => {
+  const userID = req.params.userID;
+
+  db.query('DELETE FROM users WHERE userID = ?', userID, (err, result) => {
+    if (err) {
+      console.error('Error deleting user: ', err);
+      return next(err); 
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json({ message: 'User deleted successfully' });
+  });
+});
+
+
+// Route to generate a new token
+router.get('/refresh-token', verifyToken, (req, res, next) => {
+  const userData = req.user;
+  if (!userData) {
+    return res.status(400).json({ error: 'User data not provided' });
+  }
+  
+  const token = jwt.sign(userData, JWT_SECRET, { expiresIn: '7d' }); // Expires in 7 days
+  console.log("New token:", token);
+  res.status(200).json({ token });
+});
+
+
 router.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal server error' });
@@ -53,7 +101,7 @@ function verifyToken(req, res, next) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -61,8 +109,6 @@ function verifyToken(req, res, next) {
     next();
   });
 }
-
-
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
