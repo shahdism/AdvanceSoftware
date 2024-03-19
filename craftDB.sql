@@ -3,7 +3,7 @@ use craft;
 CREATE TABLE users (
     userID INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL,
-    password VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     email VARCHAR(100) NOT NULL
 );
 
@@ -11,6 +11,8 @@ CREATE TABLE skill (
     skillID INT PRIMARY KEY AUTO_INCREMENT,
     skillName VARCHAR(50) NOT NULL
 );
+
+
 
 CREATE TABLE interest (
     interestID INT PRIMARY KEY AUTO_INCREMENT,
@@ -25,6 +27,15 @@ CREATE TABLE project (
     groupSize INT,
     userID INT,
     FOREIGN KEY (userID) REFERENCES users(userID)
+);
+CREATE TABLE UserSkillInterest (
+    RecordID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID INT,
+    SkillID INT,
+    InterestID INT,
+    FOREIGN KEY (UserID) REFERENCES users(userID),
+    FOREIGN KEY (SkillID) REFERENCES skill(skillID),
+    FOREIGN KEY (InterestID) REFERENCES interest(interestID)
 );
 
 CREATE TABLE material (
@@ -72,4 +83,16 @@ CREATE TABLE showcase (
     description TEXT
 );
 
+INSERT INTO users (username, password, email) VALUES ('anwar', 'password444', 'anwar@gmail.com');
+ALTER TABLE users MODIFY COLUMN password VARCHAR(255) NOT NULL;
 
+select *from project;
+
+ALTER TABLE project ADD COLUMN skillID INT;
+ALTER TABLE project ADD FOREIGN KEY (skillID) REFERENCES skill(skillID);
+INSERT INTO skill (skillName) VALUES ('Woodworking');
+INSERT INTO skill (skillName) VALUES ('painting');
+INSERT INTO project (title, description, diffLevel, groupSize, userID, skillID)
+VALUES ('Project 1', 'painting house', 'easy', 5, 1, 2);
+INSERT INTO UserSkillInterest (UserID, SkillID)
+VALUES (1, 2);
